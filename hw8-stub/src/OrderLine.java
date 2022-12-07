@@ -63,13 +63,13 @@ public class OrderLine {
             ResultSet rows = query.executeQuery();
             // While there are new rows, assign a new product and fields to the arraylist
             while(rows.next()){
-                orders.add(new OrderLine(new Product(rows.getString("product_code")), rows.getInt("quantity")));
-
+                orders.add(new OrderLine(new Product(rows.getString("product_code")),
+                                                     rows.getInt("quantity")));
             }
             // close the rows and the query
             rows.close();
             query.close();
-            db.close();
+           // db.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

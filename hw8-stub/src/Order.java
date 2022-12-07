@@ -69,7 +69,8 @@ public class Order {
     public void load(Connection db){
         //TODO
         try{
-            PreparedStatement query = db.prepareStatement("SELECT order_number, order_date FROM store.purchase_order");
+            PreparedStatement query = db.prepareStatement("SELECT order_number, order_date FROM store.purchase_order WHERE order_number = ?");
+            query.setString(1, this.orderNumber);
             ResultSet rows = query.executeQuery();
 
             while(rows.next()){
@@ -80,7 +81,7 @@ public class Order {
 
             rows.close();
             query.close();
-            db.close();
+           // db.close();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -96,7 +97,24 @@ public class Order {
      */
     public static ArrayList<Order> loadAll(Connection db){
         //TODO
-        return null;
+        ArrayList<Order> orders = new ArrayList<>();
+
+        try{
+            PreparedStatement query = db.prepareStatement("SELECT order_number, order_date FROM store.purchase_order");
+            ResultSet rows = query.executeQuery();
+
+            while(rows.next()){
+                Order anOrder = new Order(rows.getString("order_number"));
+                anOrder.load(db);
+                orders.add(anOrder);
+            }
+            rows.close();
+            query.close();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return orders;
     }
 
     /**
@@ -110,7 +128,26 @@ public class Order {
      */
     public static ArrayList<Order> loadInPeriod(Connection db, LocalDate start, LocalDate end){
         //TODO
-        return null;
+        ArrayList<Order> orders = new ArrayList<>();
+
+        try{
+            PreparedStatement query = db.prepareStatement("SELECT order_number, order_date FROM store.purchase_order WHERE order_date BETWEEN ? and ?");
+            query.setDate(1, Date.valueOf(start));
+            query.setDate(2, Date.valueOf(end));
+            ResultSet rows = query.executeQuery();
+
+            while (rows.next()){
+                Order anOrder = new Order(rows.getString("order_number"));
+                anOrder.load(db);
+                orders.add(anOrder);
+            }
+            rows.close();
+            query.close();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return orders;
     }
 
     /**
@@ -123,6 +160,26 @@ public class Order {
      */
     public static ArrayList<Order> loadOrdersWithProduct(Connection db, Product product){
         //TODO
-        return null;
+        ArrayList<Order> orders = new ArrayList<>();
+
+        try{
+            PreparedStatement query = db.prepareStatement
+                    ("SELECT PO.order_number FROM store.purchase_order as PO, store.order_line L " +
+                            "WHERE PO.order_number = L.order_number and L.product_code = ?");
+            query.setObject(1, product.code);
+            ResultSet rows = query.executeQuery();
+
+            while (rows.next()){
+                Order anOrder = new Order(rows.getString("order_number"));
+                anOrder.load(db);
+                orders.add(anOrder);
+            }
+            rows.close();
+            query.close();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return orders;
     }
 }
